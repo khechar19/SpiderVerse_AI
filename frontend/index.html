@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpiderVerse AI | Khechar Hustle</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="bg-effects">
+        <div class="web-grid"></div>
+        <div class="orb-red"></div>
+        <div class="orb-blue"></div>
+    </div>
+
+    <nav id="navbar">
+        <div class="container nav-content">
+            <a href="#" class="logo">SpiderVerse <span>AI</span></a>
+            <div class="nav-links">
+                <a href="#journey">Mission</a>
+                <a href="#generator">Identity</a>
+                <a href="#chat-section" class="nav-chat-link" style="display: none;">Chat</a>
+                <a href="#hacks">Spider Hacks</a>
+            </div>
+            <a href="#generator" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">Become Spider</a>
+        </div>
+    </nav>
+
+    <section id="hero">
+        <div class="container hero-grid">
+            <div class="hero-content reveal">
+                <div class="pill">Khechar Hustle</div>
+                <h1>Meet the <span class="gradient-text">Spider-Version</span> of you that already saved the day.</h1>
+                <p>SpiderVerse AI helps you discover your hidden potential through conversations with the hero you're becoming.</p>
+                <div class="hero-buttons">
+                    <a href="#generator" class="btn btn-primary">Create My Spider Identity</a>
+                    <a href="#journey" class="btn btn-secondary">Enter the SpiderVerse</a>
+                </div>
+            </div>
+            <div class="hero-image reveal">
+                <div class="glass-card glow-border preview-card">
+                    <div class="spider-sense"></div>
+                    <div class="pill" style="border-color: var(--spider-red); color: var(--spider-red);">Transmission</div>
+                    <h3 style="margin-bottom: 12px;">From Future Spider You</h3>
+                    <p style="font-size: 1.1rem; font-style: italic; color: #E5E7EB; margin-bottom: 20px; line-height: 1.6;">"You stopped waiting for confidence. You swung into action before you felt ready."</p>
+                    <div class="timeline-meta" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--glass-border); padding-top: 12px;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Status: Active Connection</span>
+                        <span style="font-size: 0.75rem; color: var(--electric-blue); font-weight: 600;">Miles Mode</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="journey">
+        <div class="container reveal">
+            <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 16px;">The Spider Journey</h2>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">Three steps to unmasking the potential that's been hiding inside you all along.</p>
+            
+            <div class="journey-grid">
+                <div class="glass-card glow-border">
+                    <div class="pill">Phase 1</div>
+                    <h3>Your Mission</h3>
+                    <p class="text-muted">Tell SpiderVerse AI what challenge you're facing. Every hero starts with a conflict they can't quite solve.</p>
+                </div>
+                <div class="glass-card glow-border">
+                    <div class="pill">Phase 2</div>
+                    <h3>Your Villain</h3>
+                    <p class="text-muted">Reveal the fear, doubt, or obstacle holding you back. We can't defeat what we don't name.</p>
+                </div>
+                <div class="glass-card glow-border">
+                    <div class="pill">Phase 3</div>
+                    <h3>Your Next Swing</h3>
+                    <p class="text-muted">Receive exact tactical guidance from the hero you've yet to become. It's time to take the leap.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="generator">
+        <div class="container reveal">
+            <div class="generator-container glass-card glow-border">
+                <h2 id="generator-title">Initialize Your Spider Identity</h2>
+                <p style="text-align: center; color: var(--text-muted); margin-bottom: 32px; margin-top: -24px;">Configure the quantum parameters for your future Spider-Self.</p>
+                
+                <form id="futureme-form">
+                    <div class="result-grid">
+                        <div class="form-group">
+                            <label for="u-name">Your Name</label>
+                            <input type="text" class="form-control" id="u-name" placeholder="Peter Parker" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="u-age">Your Age</label>
+                            <input type="number" class="form-control" id="u-age" placeholder="Age" required min="1" max="120">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="u-goal">Your Biggest Goal</label>
+                        <input type="text" class="form-control" id="u-goal" placeholder="Launch my startup, write a book, get fit..." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="u-struggle">What's holding you back? (Your Villain)</label>
+                        <input type="text" class="form-control" id="u-struggle" placeholder="Fear of failure, procrastination, lack of time..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="u-vision">Where do you want to be in one year?</label>
+                        <input type="text" class="form-control" id="u-vision" placeholder="Living on my own terms..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="u-tone">Choose Your Spider Persona</label>
+                        <select class="form-control" id="u-tone" required>
+                            <option value="friendly">Friendly Neighborhood Spider (Optimistic & Grounded)</option>
+                            <option value="miles">Miles Morales Mode (Creative & Unconventional)</option>
+                            <option value="2099">Spider 2099 Mode (Intense & Futuristic)</option>
+                            <option value="leader">Ultimate Spider Leader (Strategic & Mentoring)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submit-btn" style="width: 100%; margin-top: 16px;">
+                        <span>Generate My Spider Identity</span>
+                    </button>
+                </form>
+
+                <div id="loading-state">
+                    <div class="spinner"></div>
+                    <h3 class="gradient-text" id="loading-text">Accessing the SpiderVerse...</h3>
+                    <p style="color: var(--text-muted); margin-top: 8px;">Quantum computing future timelines.</p>
+                </div>
+
+                <div id="result-state">
+                    <div class="pill" style="border-color: var(--electric-blue); color: var(--electric-blue); margin-bottom: 20px;">Connection Established • 1 Year Future Synced</div>
+                    
+                    <!-- Profile Header Summary -->
+                    <div class="future-identity-section" style="margin-bottom: 32px;">
+                        <h4 style="font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 6px;">Your Emerging Spider Identity</h4>
+                        <h2 id="result-identity" style="color: #fff; font-size: 2.2rem; line-height: 1.2;">The Resilient Creator</h2>
+                    </div>
+                    
+                    <h3>Message From Your Future Spider Self</h3>
+                    <div class="result-message" id="dynamic-message">
+                        <!-- Message populated by JS -->
+                    </div>
+
+                    <div class="result-grid" style="margin-top: 32px;">
+                        <div class="outcome-card">
+                            <h4 style="color: var(--spider-red); margin-bottom: 12px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                <span>🎯</span> Your Next 3 Missions
+                            </h4>
+                            <ul id="result-moves" style="list-style: none; color: var(--text-muted); padding-left: 0;">
+                                <!-- Moves populated by JS -->
+                            </ul>
+                        </div>
+                        <div class="outcome-card">
+                            <h4 style="color: var(--electric-blue); margin-bottom: 12px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                <span>🔄</span> Hero Habit Starting Today
+                            </h4>
+                            <p id="result-habit" style="color: var(--text-muted); line-height: 1.5;"></p>
+                        </div>
+                    </div>
+
+                    <div class="result-grid" style="margin-top: 24px;">
+                        <div class="outcome-card warning-card">
+                            <h4 style="color: #EF4444; margin-bottom: 12px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                <span>⚠️</span> Crucial Warning
+                            </h4>
+                            <p id="result-warning" style="color: var(--text-muted); line-height: 1.5;"></p>
+                        </div>
+                        <div class="outcome-card mantra-card">
+                            <h4 style="color: #10B981; margin-bottom: 12px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                <span>✨</span> Daily Repeating Mantra
+                            </h4>
+                            <p id="result-mantra" style="color: var(--text-main); font-style: italic; font-weight: 600; line-height: 1.5;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Daily Blueprint Section -->
+                    <div class="outcome-card blueprint-section" style="grid-column: span 2; margin-top: 24px; background: rgba(255, 255, 255, 0.015); border: 1px dashed var(--glass-border); text-align: left;">
+                        <h3 style="color: #fff; margin-bottom: 8px; font-size: 1.4rem; display: flex; align-items: center; gap: 8px;">
+                            <span>📅</span> Your Daily Blueprint
+                        </h3>
+                        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">A tactical chronological roadmap constructed by your future Spider-Self to defeat your specific "villains". Click each item to check it off.</p>
+                        
+                        <div id="blueprint-timeline" class="blueprint-timeline">
+                            <!-- Populated dynamically by script.js -->
+                        </div>
+                        
+                        <div class="anti-villain-box" style="margin-top: 28px; padding: 20px; background: rgba(239, 68, 68, 0.03); border: 1px solid rgba(239, 68, 68, 0.12); border-radius: 12px;">
+                            <h4 style="color: #EF4444; font-size: 1rem; margin-bottom: 6px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                <span>🛡️</span> Procrastination Shield
+                            </h4>
+                            <p id="blueprint-shield" style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;"></p>
+                        </div>
+                        
+                        <div id="blueprint-peptalk" style="font-size: 1.15rem; font-style: italic; color: #fff; text-align: center; border-top: 1px solid var(--glass-border); margin-top: 28px; padding-top: 24px; line-height: 1.6;">
+                            <!-- Dynamic pep talk -->
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons-group">
+                        <button class="btn btn-primary" onclick="scrollToChat()" style="flex: 1;">💬 Talk to Spider-Self</button>
+                        <button class="btn btn-secondary" onclick="copyResult()" style="flex: 1;">📋 Copy Transmission</button>
+                        <button class="btn btn-secondary" onclick="resetForm()" style="width: 100%; margin-top: 16px;">🔄 Open New Timeline</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Chat Section -->
+    <section id="chat-section" style="display: none;">
+        <div class="container reveal">
+            <h2 style="text-align: center; margin-bottom: 8px;">SpiderVerse Dialogue Link</h2>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">Ask your Spider Self anything. Receive personalized guidance matching your synced identity.</p>
+            
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="connection-indicator"></div>
+                    <span id="chat-header-title">Connecting to Spider-Self (1 Year Synced)</span>
+                </div>
+                <div class="chat-body" id="chat-messages">
+                    <!-- Chat bubbles loaded dynamically -->
+                </div>
+                <div class="chat-typing-indicator" id="chat-typing" style="display: none;">
+                    <div class="typing-bubble">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="chat-input-wrapper">
+                    <form id="chat-form" style="display: flex; width: 100%; gap: 12px;">
+                        <input type="text" id="chat-input" class="form-control" placeholder="Ask your Future Spider Self anything..." required autocomplete="off">
+                        <button type="submit" class="btn btn-primary" id="chat-send-btn" style="padding: 12px 24px;">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="hacks">
+        <div class="container reveal">
+            <h2 style="text-align: center; margin-bottom: 16px;">Khechar Hustle <span class="accent-text-red">Spider Hacks</span></h2>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 40px;">Advanced techniques for using SpiderVerse AI.</p>
+            
+            <div class="hacks-grid">
+                <div class="glass-card">
+                    <div class="pill">Hack 01</div>
+                    <h4 style="margin-bottom: 8px;">Hero Prompting</h4>
+                    <p class="text-muted" style="font-size: 0.9rem;">Ask the AI to respond specifically as the version of you who already solved the exact problem you are currently facing.</p>
+                </div>
+                <div class="glass-card">
+                    <div class="pill">Hack 02</div>
+                    <h4 style="margin-bottom: 8px;">Mission Constraints</h4>
+                    <p class="text-muted" style="font-size: 0.9rem;">Add real-world limits to your prompts (e.g., "I only have 1 hour a day and zero budget") to generate realistic, actionable advice.</p>
+                </div>
+                <div class="glass-card">
+                    <div class="pill">Hack 03</div>
+                    <h4 style="margin-bottom: 8px;">Villain Analysis</h4>
+                    <p class="text-muted" style="font-size: 0.9rem;">Ask the AI to act as an objective observer and pinpoint the hidden weakness your future hero self would eliminate first.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="final" style="text-align: center; padding-bottom: 150px;">
+        <div class="container reveal">
+            <div class="spider-sense" style="position: relative; margin: 0 auto 24px; top: 0; right: 0;"></div>
+            <h2 style="font-size: 3rem; margin-bottom: 16px;">You didn't just build a page. <br><span class="gradient-text">You discovered your Identity.</span></h2>
+            <p style="color: var(--text-muted); font-size: 1.25rem; margin-bottom: 40px;">SpiderVerse AI transforms AI into a personal superhero mentor.</p>
+            <button class="btn btn-primary" onclick="copyResult()">Share My Spider Identity</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>Khechar Hustle &bull; SpiderVerse AI Live Build &bull; Premium Experience &bull; Sunday Session Demo</p>
+        </div>
+    </footer>
+
+    <div id="toast" class="toast">Your SpiderVerse journey is ready to share.</div>
+
+    <script src="script.js"></script>
+</body>
+</html>

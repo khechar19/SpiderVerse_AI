@@ -1,0 +1,14 @@
+{
+  "name": "futureme-root",
+  "version": "1.0.0",
+  "description": "Root configuration for FutureMe deployment on Netlify",
+  "scripts": {
+    "build": "echo 'Building static site assets...'"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.11.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "serverless-http": "^3.2.0"
+  }
+}
