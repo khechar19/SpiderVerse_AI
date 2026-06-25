@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const dotenv = require("dotenv");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Load Environment Variables
@@ -10,9 +12,55 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// Security Middleware - HTTP Headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Allow local fonts and icons without config complexity
+  crossOriginEmbedderPolicy: false
+}));
+
+// CORS Configuration - Restrict to Whitelisted Origins
+const allowedOrigins = [
+  "http://localhost:5000",
+  "http://localhost:8888",
+  "https://relaxed-tartufo-3c066c.netlify.app"
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Allow tools/curl requests or local files
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
+
 app.use(express.json());
+
+// Server-side Input Sanitizer Utility
+function sanitizeInput(str, maxLength) {
+  if (typeof str !== 'string') return '';
+  let cleaned = str.replace(/<[^>]*>/g, ''); // Strip HTML tags
+  cleaned = cleaned.trim();
+  if (cleaned.length > maxLength) {
+    cleaned = cleaned.substring(0, maxLength);
+  }
+  return cleaned;
+}
+
+// Rate Limiter configuration for API endpoints (10 requests per minute per IP)
+const apiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 10,
+  message: {
+    success: false,
+    error: "Too many requests from this IP. Please try again after 1 minute."
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, "../frontend")));
@@ -43,14 +91,29 @@ function cleanAndParseJSON(text) {
 }
 
 // 1. POST /api/generate-futureme
-app.post("/api/generate-futureme", async (req, res) => {
-  const { name, age, goal, struggle, oneYearVision, tone } = req.body;
+app.post("/api/generate-futureme", apiLimiter, async (req, res) => {
+  let { name, age, goal, struggle, oneYearVision, tone } = req.body;
+
+  // Sanitize inputs
+  name = sanitizeInput(name, 50);
+  goal = sanitizeInput(goal, 300);
+  struggle = sanitizeInput(struggle, 300);
+  oneYearVision = sanitizeInput(oneYearVision, 300);
+  tone = sanitizeInput(tone, 30);
 
   // Basic validation
   if (!name || !age || !goal || !struggle || !oneYearVision || !tone) {
     return res.status(400).json({
       success: false,
-      error: "All fields are required: name, age, goal, struggle, oneYearVision, tone."
+      error: "All fields are required and must contain valid text."
+    });
+  }
+
+  const parsedAge = parseInt(age, 10);
+  if (isNaN(parsedAge) || parsedAge < 1 || parsedAge > 120) {
+    return res.status(400).json({
+      success: false,
+      error: "Age must be a valid number between 1 and 120."
     });
   }
 
@@ -76,7 +139,7 @@ Persona selected by user: ${tone} (Please make your tone/style: ${toneGuidance})
 
 User details:
 Name: ${name}
-Age: ${age}
+Age: ${parsedAge}
 Goal: ${goal}
 Current struggle: ${struggle}
 One-year vision: ${oneYearVision}
@@ -104,7 +167,13 @@ Make it highly specific to their struggle ("${struggle}") and their goal ("${goa
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        maxOutputTokens: 2048,
+        temperature: 0.8
+      }
+    });
     const responseText = result.response.text();
     
     // Parse the generated JSON response
@@ -118,14 +187,14 @@ Make it highly specific to their struggle ("${struggle}") and their goal ("${goa
     console.error("Error generating FutureMe profile:", error);
     res.status(500).json({
       success: false,
-      error: "FutureMe could not respond right now. Try again."
+      error: "The temporal timeline could not be configured securely. Please try again."
     });
   }
 });
 
 // 2. POST /api/chat-futureme
-app.post("/api/chat-futureme", async (req, res) => {
-  const { userProfile, chatHistory, question } = req.body;
+app.post("/api/chat-futureme", apiLimiter, async (req, res) => {
+  let { userProfile, chatHistory, question } = req.body;
 
   if (!userProfile || !question) {
     return res.status(400).json({
@@ -134,15 +203,31 @@ app.post("/api/chat-futureme", async (req, res) => {
     });
   }
 
-  const { name, age, goal, struggle, oneYearVision, tone } = userProfile;
+  // Sanitize user profile
+  let name = sanitizeInput(userProfile.name, 50);
+  let age = parseInt(userProfile.age, 10);
+  let goal = sanitizeInput(userProfile.goal, 300);
+  let struggle = sanitizeInput(userProfile.struggle, 300);
+  let oneYearVision = sanitizeInput(userProfile.oneYearVision, 300);
+  let tone = sanitizeInput(userProfile.tone, 30);
+  question = sanitizeInput(question, 500);
 
-  // Format chat history for context
+  if (!name || isNaN(age) || age < 1 || age > 120 || !goal || !struggle || !oneYearVision || !tone || !question) {
+    return res.status(400).json({
+      success: false,
+      error: "Valid profile parameters and question text are required."
+    });
+  }
+
+  // Format and sanitize chat history safely
   let historyPrompt = "";
-  if (chatHistory && chatHistory.length > 0) {
-    historyPrompt = chatHistory.map(chat => {
+  if (chatHistory && Array.isArray(chatHistory)) {
+    const sanitizedHistory = chatHistory.map(chat => {
       const roleName = chat.role === "user" ? "Current Me" : "Future Me";
-      return `${roleName}: ${chat.message}`;
-    }).join("\n");
+      const message = sanitizeInput(chat.message, 1000);
+      return `${roleName}: ${message}`;
+    });
+    historyPrompt = sanitizedHistory.join("\n");
   } else {
     historyPrompt = "No prior chat messages. This is the start of the follow-up conversation.";
   }
@@ -160,7 +245,7 @@ app.post("/api/chat-futureme", async (req, res) => {
     toneGuidance = "supportive, clear, and authentic.";
   }
 
-  const prompt = `You are FutureMe, the future Spider-Self of the user who already put on the mask and saved the day. Reply directly to the user's question. Be personal, sharp, honest, courageous, and useful, using occasional subtle SpiderVerse analogies (e.g. web-swinging, leaps of faith, saving the city, fighting villains). Do not sound like a normal AI assistant. Do not mention that you are Gemini or an AI model. Speak like their future Spider-Self.
+  const prompt = `You are FutureMe, the future Spider-Self of the user who already put on the mask and saved the day. Reply directly to the user's question. Be personal, sharp, honest, courageous, and useful, using occasional subtle SpiderVerse analogies (e.g. web-slinging, leaps of faith, saving the city, fighting villains). Do not sound like a normal AI assistant. Do not mention that you are Gemini or an AI model. Speak like their future Spider-Self.
 
 User profile:
 Name: ${name}
@@ -180,7 +265,13 @@ Reply in 2-5 short, punchy paragraphs. Give at least one clear, actionable advic
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        maxOutputTokens: 1024,
+        temperature: 0.8
+      }
+    });
     const replyText = result.response.text();
 
     res.json({
@@ -191,7 +282,7 @@ Reply in 2-5 short, punchy paragraphs. Give at least one clear, actionable advic
     console.error("Error in FutureMe chat:", error);
     res.status(500).json({
       success: false,
-      error: "FutureMe could not respond right now. Try again."
+      error: "Dialogue channel encountered a timeout or configuration error. Please restate your question."
     });
   }
 });

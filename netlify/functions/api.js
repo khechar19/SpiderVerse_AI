@@ -1,12 +1,37 @@
 const express = require("express");
 const cors = require("cors");
 const serverless = require("serverless-http");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Security Middleware - HTTP Headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Allow local assets to execute cleanly
+  crossOriginEmbedderPolicy: false
+}));
+
+// CORS Configuration - Restrict to Whitelisted Origins
+const allowedOrigins = [
+  "http://localhost:5000",
+  "http://localhost:8888",
+  "https://relaxed-tartufo-3c066c.netlify.app"
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Allow server-to-server or tools
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Initialize Gemini API
@@ -33,17 +58,59 @@ function cleanAndParseJSON(text) {
   return JSON.parse(cleaned);
 }
 
+// Server-side Input Sanitizer Utility
+function sanitizeInput(str, maxLength) {
+  if (typeof str !== 'string') return '';
+  let cleaned = str.replace(/<[^>]*>/g, ''); // Strip HTML tags
+  cleaned = cleaned.trim();
+  if (cleaned.length > maxLength) {
+    cleaned = cleaned.substring(0, maxLength);
+  }
+  return cleaned;
+}
+
+// Rate Limiter configuration (10 requests per minute per IP)
+const apiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 10,
+  message: {
+    success: false,
+    error: "Too many requests. Please try again after 1 minute."
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Router to support path resolutions on Netlify
 const router = express.Router();
 
+// Apply Rate Limiter to Router
+router.use(apiLimiter);
+
 // 1. POST /generate-futureme
 router.post("/generate-futureme", async (req, res) => {
-  const { name, age, goal, struggle, oneYearVision, tone } = req.body;
+  let { name, age, goal, struggle, oneYearVision, tone } = req.body;
 
+  // Sanitize inputs
+  name = sanitizeInput(name, 50);
+  goal = sanitizeInput(goal, 300);
+  struggle = sanitizeInput(struggle, 300);
+  oneYearVision = sanitizeInput(oneYearVision, 300);
+  tone = sanitizeInput(tone, 30);
+
+  // Validation
   if (!name || !age || !goal || !struggle || !oneYearVision || !tone) {
     return res.status(400).json({
       success: false,
-      error: "All fields are required: name, age, goal, struggle, oneYearVision, tone."
+      error: "All fields are required and must contain valid text."
+    });
+  }
+
+  const parsedAge = parseInt(age, 10);
+  if (isNaN(parsedAge) || parsedAge < 1 || parsedAge > 120) {
+    return res.status(400).json({
+      success: false,
+      error: "Age must be a valid number between 1 and 120."
     });
   }
 
@@ -68,7 +135,7 @@ Persona selected by user: ${tone} (Please make your tone/style: ${toneGuidance})
 
 User details:
 Name: ${name}
-Age: ${age}
+Age: ${parsedAge}
 Goal: ${goal}
 Current struggle: ${struggle}
 One-year vision: ${oneYearVision}
@@ -96,7 +163,13 @@ Make it highly specific to their struggle ("${struggle}") and their goal ("${goa
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        maxOutputTokens: 2048,
+        temperature: 0.8
+      }
+    });
     const responseText = result.response.text();
     
     const parsedData = cleanAndParseJSON(responseText);
@@ -109,14 +182,14 @@ Make it highly specific to their struggle ("${struggle}") and their goal ("${goa
     console.error("Error generating FutureMe profile:", error);
     res.status(500).json({
       success: false,
-      error: "FutureMe could not respond right now. Try again."
+      error: "The temporal timeline could not be configured securely. Please try again."
     });
   }
 });
 
 // 2. POST /chat-futureme
 router.post("/chat-futureme", async (req, res) => {
-  const { userProfile, chatHistory, question } = req.body;
+  let { userProfile, chatHistory, question } = req.body;
 
   if (!userProfile || !question) {
     return res.status(400).json({
@@ -125,14 +198,31 @@ router.post("/chat-futureme", async (req, res) => {
     });
   }
 
-  const { name, age, goal, struggle, oneYearVision, tone } = userProfile;
+  // Sanitize user profile
+  let name = sanitizeInput(userProfile.name, 50);
+  let age = parseInt(userProfile.age, 10);
+  let goal = sanitizeInput(userProfile.goal, 300);
+  let struggle = sanitizeInput(userProfile.struggle, 300);
+  let oneYearVision = sanitizeInput(userProfile.oneYearVision, 300);
+  let tone = sanitizeInput(userProfile.tone, 30);
+  question = sanitizeInput(question, 500);
 
+  if (!name || isNaN(age) || age < 1 || age > 120 || !goal || !struggle || !oneYearVision || !tone || !question) {
+    return res.status(400).json({
+      success: false,
+      error: "Valid profile parameters and question text are required."
+    });
+  }
+
+  // Format and sanitize chat history safely
   let historyPrompt = "";
-  if (chatHistory && chatHistory.length > 0) {
-    historyPrompt = chatHistory.map(chat => {
+  if (chatHistory && Array.isArray(chatHistory)) {
+    const sanitizedHistory = chatHistory.map(chat => {
       const roleName = chat.role === "user" ? "Current Me" : "Future Me";
-      return `${roleName}: ${chat.message}`;
-    }).join("\n");
+      const message = sanitizeInput(chat.message, 1000);
+      return `${roleName}: ${message}`;
+    });
+    historyPrompt = sanitizedHistory.join("\n");
   } else {
     historyPrompt = "No prior chat messages. This is the start of the follow-up conversation.";
   }
@@ -170,7 +260,13 @@ Reply in 2-5 short, punchy paragraphs. Give at least one clear, actionable advic
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        maxOutputTokens: 1024,
+        temperature: 0.8
+      }
+    });
     const replyText = result.response.text();
 
     res.json({
@@ -181,7 +277,7 @@ Reply in 2-5 short, punchy paragraphs. Give at least one clear, actionable advic
     console.error("Error in FutureMe chat:", error);
     res.status(500).json({
       success: false,
-      error: "FutureMe could not respond right now. Try again."
+      error: "Dialogue channel encountered a timeout or configuration error. Please restate your question."
     });
   }
 });

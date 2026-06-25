@@ -102,44 +102,86 @@ form.addEventListener('submit', async function(e) {
             const data = result.data;
 
             // Populate outcomes
-            document.getElementById('result-identity').innerText = data.futureIdentity || "The Unstoppable Version of You";
-            document.getElementById('dynamic-message').innerText = `"${data.message}"`;
+            document.getElementById('result-identity').textContent = data.futureIdentity || "The Unstoppable Version of You";
+            document.getElementById('dynamic-message').textContent = `"${data.message}"`;
             
             // Next 3 moves list
             const movesList = document.getElementById('result-moves');
-            movesList.innerHTML = '';
+            movesList.textContent = '';
             if (data.nextMoves && Array.isArray(data.nextMoves)) {
                 data.nextMoves.forEach((move, i) => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<strong>${i + 1}.</strong> ${move}`;
+                    const strong = document.createElement('strong');
+                    strong.textContent = `${i + 1}. `;
+                    li.appendChild(strong);
+                    li.appendChild(document.createTextNode(move));
                     movesList.appendChild(li);
                 });
             } else {
-                movesList.innerHTML = "<li>Map out details of your initial launch.</li><li>Establish consistency filters.</li><li>Execute complex challenges first.</li>";
+                const defaultMoves = [
+                    "Map out details of your initial launch.",
+                    "Establish consistency filters.",
+                    "Execute complex challenges first."
+                ];
+                defaultMoves.forEach((move, i) => {
+                    const li = document.createElement('li');
+                    const strong = document.createElement('strong');
+                    strong.textContent = `${i + 1}. `;
+                    li.appendChild(strong);
+                    li.appendChild(document.createTextNode(move));
+                    movesList.appendChild(li);
+                });
             }
 
-            document.getElementById('result-habit').innerHTML = `<strong>The Daily Ritual:</strong> ${data.habit}`;
-            document.getElementById('result-warning').innerText = data.warning;
-            document.getElementById('result-mantra').innerText = `"${data.mantra}"`;
+            const habitEl = document.getElementById('result-habit');
+            habitEl.textContent = '';
+            const habitStrong = document.createElement('strong');
+            habitStrong.textContent = "The Daily Ritual: ";
+            habitEl.appendChild(habitStrong);
+            habitEl.appendChild(document.createTextNode(data.habit));
+            
+            document.getElementById('result-warning').textContent = data.warning;
+            document.getElementById('result-mantra').textContent = `"${data.mantra}"`;
 
             // Populate Daily Blueprint
             const timelineContainer = document.getElementById('blueprint-timeline');
-            timelineContainer.innerHTML = '';
+            timelineContainer.textContent = '';
             
             if (data.blueprint && Array.isArray(data.blueprint)) {
                 data.blueprint.forEach((item, index) => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'blueprint-item';
                     
-                    itemDiv.innerHTML = `
-                        <div class="blueprint-checkbox" id="checkbox-${index}"></div>
-                        <div class="blueprint-content">
-                            <div class="blueprint-time">${item.time}</div>
-                            <div class="blueprint-title">${item.title}</div>
-                            <div class="blueprint-desc">${item.task}</div>
-                            <div class="blueprint-tip">💡 ${item.tip}</div>
-                        </div>
-                    `;
+                    const checkbox = document.createElement('div');
+                    checkbox.className = 'blueprint-checkbox';
+                    checkbox.id = `checkbox-${index}`;
+                    
+                    const content = document.createElement('div');
+                    content.className = 'blueprint-content';
+                    
+                    const bTime = document.createElement('div');
+                    bTime.className = 'blueprint-time';
+                    bTime.textContent = item.time;
+                    
+                    const bTitle = document.createElement('div');
+                    bTitle.className = 'blueprint-title';
+                    bTitle.textContent = item.title;
+                    
+                    const bDesc = document.createElement('div');
+                    bDesc.className = 'blueprint-desc';
+                    bDesc.textContent = item.task;
+                    
+                    const bTip = document.createElement('div');
+                    bTip.className = 'blueprint-tip';
+                    bTip.textContent = `💡 ${item.tip}`;
+                    
+                    content.appendChild(bTime);
+                    content.appendChild(bTitle);
+                    content.appendChild(bDesc);
+                    content.appendChild(bTip);
+                    
+                    itemDiv.appendChild(checkbox);
+                    itemDiv.appendChild(content);
                     
                     // Click handler to toggle completed checklist status
                     itemDiv.addEventListener('click', () => {
@@ -164,7 +206,10 @@ form.addEventListener('submit', async function(e) {
                     timelineContainer.appendChild(itemDiv);
                 });
             } else {
-                timelineContainer.innerHTML = '<p class="text-muted">No timeline protocol generated.</p>';
+                const noTimeline = document.createElement('p');
+                noTimeline.className = 'text-muted';
+                noTimeline.textContent = 'No timeline protocol generated.';
+                timelineContainer.appendChild(noTimeline);
             }
 
             document.getElementById('blueprint-shield').innerText = data.antiVillainShield || "Stay fully focused on your first task today before checking social media notifications.";
@@ -288,9 +333,13 @@ function appendChatBubble(role, text) {
     bubble.classList.add('msg', role);
     
     if (role === 'ai') {
-        bubble.innerHTML = `<div class="time-pulse" style="top: -4px; right: -4px; width: 8px; height: 8px;"></div>${text.replace(/\n/g, '<br>')}`;
+        const pulse = document.createElement('div');
+        pulse.className = 'time-pulse';
+        pulse.style.cssText = 'top: -4px; right: -4px; width: 8px; height: 8px;';
+        bubble.appendChild(pulse);
+        bubble.appendChild(document.createTextNode(text));
     } else {
-        bubble.innerText = text;
+        bubble.textContent = text;
     }
     
     messagesContainer.appendChild(bubble);
